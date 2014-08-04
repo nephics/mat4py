@@ -1,0 +1,4 @@
+syntax: regexp
+.*\.orig
+local
+.*\.pyc
