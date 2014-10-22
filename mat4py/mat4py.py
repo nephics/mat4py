@@ -28,7 +28,7 @@ The following Matlab data structures/types are not supported:
 * Anonymous function classes
 """
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 __all__ = ['loadmat', 'savemat']
 __license__ = """The MIT License (MIT), Copyright (c) 2011-2014 Nephics AB"""
 
