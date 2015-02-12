@@ -30,7 +30,7 @@ The following Matlab data structures/types are not supported:
 
 __version__ = '0.1.1'
 __all__ = ['loadmat', 'savemat']
-__license__ = """The MIT License (MIT), Copyright (c) 2011-2014 Nephics AB"""
+__license__ = """The MIT License (MIT), Copyright (c) 2011-2015 Nephics AB"""
 
 
 import struct
