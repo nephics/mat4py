@@ -49,7 +49,7 @@ a routine for converting Matlab MAT-files to/from JSON files.
 
 Call::
 
-    python -m mat4py -h
+    python -m mat4py.cmd -h
 
 to get help with command line usage.
 
