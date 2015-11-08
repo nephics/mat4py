@@ -1,1 +1,1 @@
-from mat4py import *
+from .mat4py import *

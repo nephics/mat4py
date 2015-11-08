@@ -39,8 +39,15 @@ import time
 import zlib
 
 from collections import Sequence, Mapping
-from itertools import chain, izip, tee
-from cStringIO import StringIO as BytesIO
+from itertools import chain, tee
+try:
+    from itertools import izip
+    ispy2 = True
+except ImportError:
+    izip = zip
+    basestring = str
+    ispy2 = False
+from io import BytesIO
 
 
 # encode a string to bytes and vice versa
@@ -67,7 +74,7 @@ etypes = {
 }
 
 # inverse mapping of etypes
-inv_etypes = dict((v['n'], k) for k, v in etypes.iteritems())
+inv_etypes = dict((v['n'], k) for k, v in etypes.items())
 
 # matrix array classes
 mclasses = {
@@ -105,7 +112,7 @@ numeric_class_etypes = {
     'mxUINT64_CLASS': 'miUINT64'
 }
 
-inv_mclasses = dict((v, k) for k, v in mclasses.iteritems())
+inv_mclasses = dict((v, k) for k, v in mclasses.items())
 
 # data types that may be used when writing numeric data
 compressed_numeric = ['miINT32', 'miUINT16', 'miINT16', 'miUINT8']
@@ -212,7 +219,7 @@ def loadmat(filename, meta=False):
         """
         mtpn, num_bytes, data = read_element_tag(fd)
         if mtps and mtpn not in [etypes[mtp]['n'] for mtp in mtps]:
-            raise ParseError('Expected {0} type number {1}, got {2}'
+            raise ParseError('Expected {} type number {}, got {}'
                              .format(mtp, etypes[mtp]['n'], mtpn))
         if not data:
             # full format, read data
@@ -227,11 +234,13 @@ def loadmat(filename, meta=False):
             # names are stored as miINT8 bytes
             fmt = 's'
             val = [unpack(fmt, s)
-                   for s in data.split('\0') if s]
+                   for s in data.split(b'\0') if s]
             if len(val) == 0:
                 val = ''
-            if len(val) == 1:
-                val = val[0]
+            elif len(val) == 1:
+                val = asstr(val[0])
+            else:
+                val = [asstr(s) for s in val]
         else:
             fmt = etypes[inv_etypes[mtpn]]['fmt']
             val = unpack(fmt, data)
@@ -272,14 +281,14 @@ def loadmat(filename, meta=False):
             del data
             fd = fd_var
             # Check the stream is not so broken as to leave cruft behind
-            if dcor.flush() != asbytes(''):
+            if dcor.flush() != b'':
                 raise ParseError('Error in compressed data.')
             # read full tag from the uncompressed data
             mtpn, num_bytes = unpack('II', fd.read(8))
 
         if mtpn != etypes['miMATRIX']['n']:
-            raise ParseError('Expecting miMATRIX type number {0}, '
-                             'got {1}'.format(etypes['miMATRIX']['n'], mtpn))
+            raise ParseError('Expecting miMATRIX type number {}, '
+                             'got {}'.format(etypes['miMATRIX']['n'], mtpn))
         # read the header
         header = read_header(fd)
         return header, next_pos, fd
@@ -307,8 +316,8 @@ def loadmat(filename, meta=False):
         # a row major array of nested lists
         rowcount = header['dims'][0]
         colcount = header['dims'][1]
-        array = [list(data[c * rowcount + r] for c in xrange(colcount))
-                 for r in xrange(rowcount)]
+        array = [list(data[c * rowcount + r] for c in range(colcount))
+                 for r in range(rowcount)]
         # pack and return the array
         return squeeze(array)
 
@@ -316,9 +325,9 @@ def loadmat(filename, meta=False):
         """Read a cell array.
         Returns an array with rows of the cell array.
         """
-        array = [list() for i in xrange(header['dims'][0])]
-        for row in xrange(header['dims'][0]):
-            for col in xrange(header['dims'][1]):
+        array = [list() for i in range(header['dims'][0])]
+        for row in range(header['dims'][0]):
+            for col in range(header['dims'][1]):
                 # read the matrix header and array
                 vheader, next_pos, fd_var = read_var_header(fd)
                 varray = read_var_array(fd_var, vheader)
@@ -346,10 +355,10 @@ def loadmat(filename, meta=False):
             fields = [fields]
 
         # read rows and columns of each field
-        empty = lambda: [list() for i in xrange(header['dims'][0])]
+        empty = lambda: [list() for i in range(header['dims'][0])]
         array = {}
-        for row in xrange(header['dims'][0]):
-            for col in xrange(header['dims'][1]):
+        for row in range(header['dims'][0]):
+            for col in range(header['dims'][1]):
                 for field in fields:
                     # read the matrix header and array
                     vheader, next_pos, fd_var = read_var_header(fd)
@@ -362,7 +371,7 @@ def loadmat(filename, meta=False):
         # pack the nested arrays
         for field in fields:
             rows = array[field]
-            for i in xrange(header['dims'][0]):
+            for i in range(header['dims'][0]):
                 rows[i] = squeeze(rows[i])
             array[field] = squeeze(array[field])
         return array
@@ -370,11 +379,11 @@ def loadmat(filename, meta=False):
     def read_char_array(fd, header):
         array = read_numeric_array(fd, header, ['miUTF8'])
         if header['dims'][0] > 1:
-            # collapse row elements (chars) to a single string
-            array = [''.join(i) for i in array]
+            # collapse rows of chars into a list of strings
+            array = [asstr(bytearray(i)) for i in array]
         else:
-            # collaps row to a single value
-            array = ''.join(array)
+            # collaps row of chars into a single string
+            array = asstr(bytearray(array))
         return array
 
     def read_var_array(fd, header):
@@ -423,7 +432,7 @@ def loadmat(filename, meta=False):
     # endian test string
     fd.seek(124)
     tst_str = fd.read(4)
-    little_endian = tst_str[2:4] == asbytes('IM')
+    little_endian = (tst_str[2:4] == b'IM')
     endian = ''
     if (sys.byteorder == 'little' and little_endian) or \
        (sys.byteorder == 'big' and not little_endian):
@@ -437,11 +446,11 @@ def loadmat(filename, meta=False):
         endian = '<'
     maj_ind = int(little_endian)
     # major version number
-    maj_val = ord(tst_str[maj_ind])
+    maj_val = ord(tst_str[maj_ind]) if ispy2 else tst_str[maj_ind]
     if maj_val != 1:
         raise ParseError('Can only read from Matlab level 5 MAT-files')
     # the minor version number (unused value)
-    # min_val = ord(tst_str[1 - maj_ind])
+    # min_val = ord(tst_str[1 - maj_ind]) if ispy2 else tst_str[1 - maj_ind]
 
     mdict = {}
     if meta:
@@ -453,9 +462,9 @@ def loadmat(filename, meta=False):
     # read data elements
     while not eof(fd):
         hdr, next_position, fd_var = read_var_header(fd)
-        name = asstr(hdr['name'])
+        name = hdr['name']
         if name in mdict:
-            raise ParseError('Duplicate variable name "{0}" in mat file.'
+            raise ParseError('Duplicate variable name "{}" in mat file.'
                              .format(name))
 
         # read the matrix
@@ -490,13 +499,13 @@ def savemat(filename, data):
         # write file header
         desc = 'MATLAB 5.0 MAT-file, created with mat4py on: ' + \
                time.strftime("%a, %b %d %Y %H:%M:%S", time.localtime())
-        fd.write(struct.pack('116s', desc))
-        fd.write(struct.pack('8s', ' ' * 8))
+        fd.write(struct.pack('116s', desc.encode('latin1')))
+        fd.write(struct.pack('8s', b' ' * 8))
         fd.write(struct.pack('H', 0x100))
         if sys.byteorder == 'big':
-            fd.write(struct.pack('2s', 'MI'))
+            fd.write(struct.pack('2s', b'MI'))
         else:
-            fd.write(struct.pack('2s', 'IM'))
+            fd.write(struct.pack('2s', b'IM'))
 
     def write_elements(fd, mtp, data, is_name=False):
         """Write data element tag and data.
@@ -510,20 +519,20 @@ def savemat(filename, data):
         fmt = etypes[mtp]['fmt']
         if isinstance(data, Sequence):
             if fmt == 's' or is_name:
-                if isinstance(data, basestring):
+                if isinstance(data, bytes):
                     if is_name and len(data) > 31:
                         raise ValueError(
                             'Name "{}" is too long (max. 31 '
                             'characters allowed)'.format(data))
-                    data = [asbytes(data)]
+                    fmt = '{}s'.format(len(data))
+                    data = (data,)
                 else:
-                    data = [asbytes(s) for s in data]
-                fmt = ''.join('{0}s'.format(len(s)) for s in data)
+                    fmt = ''.join('{}s'.format(len(s)) for s in data)
             else:
                 l = len(data)
                 if l > 1:
                     # more than one element to be written
-                    fmt = '{0}{1}'.format(l, fmt)
+                    fmt = '{}{}'.format(l, fmt)
         else:
             data = (data,)
         num_bytes = struct.calcsize(fmt)
@@ -531,7 +540,7 @@ def savemat(filename, data):
             # write SDE
             if num_bytes < 4:
                 # add pad bytes
-                fmt += '{0}x'.format(4 - num_bytes)
+                fmt += '{}x'.format(4 - num_bytes)
             fd.write(struct.pack('hh' + fmt, etypes[mtp]['n'],
                      *chain([num_bytes], data)))
             return
@@ -540,7 +549,7 @@ def savemat(filename, data):
         # add pad bytes to fmt, if needed
         mod8 = num_bytes % 8
         if mod8:
-            fmt += '{0}x'.format(8 - mod8)
+            fmt += '{}x'.format(8 - mod8)
         # write data
         fd.write(struct.pack(fmt, *data))
 
@@ -556,7 +565,7 @@ def savemat(filename, data):
         write_elements(fd, 'miINT32', header['dims'])
 
         # write var name
-        write_elements(fd, 'miINT8', header['name'], is_name=True)
+        write_elements(fd, 'miINT8', asbytes(header['name']), is_name=True)
 
     def write_var_data(fd, data):
         """Write variable data to file"""
@@ -609,8 +618,8 @@ def savemat(filename, data):
         # write matrix header to memory file
         write_var_header(bd, header)
 
-        for row in xrange(header['dims'][0]):
-            for col in xrange(header['dims'][1]):
+        for row in range(header['dims'][0]):
+            for col in range(header['dims'][1]):
                 if header['dims'][0] > 1:
                     vdata = array[row][col]
                 else:
@@ -630,28 +639,28 @@ def savemat(filename, data):
         # write matrix header to memory file
         write_var_header(bd, header)
 
-        fields = dict((f, len(f)) for f in (asbytes(s)
-                      for s in array.iterkeys()))
+        fieldnames = list(array.keys())
+
+        field_names_sizes = [(f, len(f)) for f in (asbytes(s)
+                             for s in fieldnames)]
 
         # write field name length (the str length + a null byte)
-        field_length = max(fields.itervalues()) + 1
+        field_length = max(i[1] for i in field_names_sizes) + 1
         if field_length > 32:
             raise ValueError('Struct field names are too long')
         write_elements(bd, 'miINT32', field_length)
 
         # write fieldnames
-        if any(v > 31 for v in fields.itervalues()):
-            raise ValueError('Struct field name(s) are too long')
         write_elements(
             bd, 'miINT8',
-            [f + (field_length - l % field_length) * '\0'
-             for f, l in fields.iteritems()],
+            [f + (field_length - l % field_length) * b'\0'
+             for f, l in field_names_sizes],
             is_name=True)
 
         # wrap each field in a cell
-        for row in xrange(header['dims'][0]):
-            for col in xrange(header['dims'][1]):
-                for field in array:
+        for row in range(header['dims'][0]):
+            for col in range(header['dims'][1]):
+                for field in fieldnames:
                     if header['dims'][0] > 1:
                         vdata = array[field][col][row]
                     elif header['dims'][1] > 1:
@@ -668,10 +677,10 @@ def savemat(filename, data):
     def write_char_array(fd, header, array):
         if isinstance(array, basestring):
             # split string into chars
-            array = [c for c in array]
+            array = [asbytes(c) for c in array]
         else:
             # split each string in list into chars
-            array = [[c for c in s] for s in array]
+            array = [[asbytes(c) for c in s] for s in array]
         return write_numeric_array(fd, header, array)
 
     def write_var_array(fd, array, name=''):
@@ -695,7 +704,7 @@ def savemat(filename, data):
         """
         if dim > 1:
             return all(isarray(array[i], test, dim - 1)
-                       for i in xrange(len(array)))
+                       for i in range(len(array)))
         return all(test(i) for i in array)
 
     def guess_header(array, name=''):
@@ -716,9 +725,9 @@ def savemat(filename, data):
         elif isinstance(array, Mapping):
             # test if cells (values) of all fields are of equal type and
             # have equal length
-            field_types = [type(j) for j in array.itervalues()]
+            field_types = [type(j) for j in array.values()]
             field_lengths = [1 if isinstance(j, (basestring, int, float))
-                             else len(j) for j in array.itervalues()]
+                             else len(j) for j in array.values()]
             if len(field_lengths) == 1:
                 equal_lengths = True
                 equal_types = True
@@ -803,7 +812,7 @@ def savemat(filename, data):
                 # mixed contents, make it a cell array
                 header.update({
                     'mclass': 'mxCELL_CLASS',
-                    'dims': (1, len(next(array.itervalues())))})
+                    'dims': (1, len(next(array.values())))})
 
         if not header:
             raise ValueError(
@@ -823,7 +832,7 @@ def savemat(filename, data):
     write_file_header(fd)
 
     # write variables
-    for name, array in data.iteritems():
+    for name, array in data.items():
         write_compressed_var_array(fd, array, name)
 
     fd.close()

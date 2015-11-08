@@ -12,6 +12,7 @@ to get help with command line usage.
 import argparse
 import json
 import os
+import sys
 
 from mat4py import loadmat, savemat
 
@@ -52,7 +53,7 @@ def main():
                     os.remove(path)
             except Exception as e:
                 print('Error: {}'.format(e))
-                exit(1)
+                sys.exit(1)
 
         elif ext == '.json':
             dest = spl[0] + '.mat'
@@ -66,10 +67,10 @@ def main():
                     os.remove(path)
             except RuntimeError as e:
                 print('Error: {}'.format(e))
-                exit(1)
+                sys.exit(1)
         else:
-            print('Unsupported file extension on file: {0}'.format(path))
-            exit(1)
+            print('Unsupported file extension on file: {}'.format(path))
+            sys.exit(1)
 
 
 if __name__ == '__main__':
