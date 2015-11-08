@@ -1,12 +1,13 @@
 from distutils.core import setup
 
+
 def readme():
     with open('README.rst') as f:
         return f.read()
 
 setup(
     name='mat4py',
-    version='0.1.2',
+    version='0.2.0',
     author='Jacob Sondergaard',
     author_email='jacob@nephics.com',
     packages=['mat4py'],
@@ -18,6 +19,7 @@ setup(
         'Development Status :: 5 - Production/Stable',
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.4',
         'Topic :: Scientific/Engineering'
     ]
 )
