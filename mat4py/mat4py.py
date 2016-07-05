@@ -603,8 +603,7 @@ def savemat(filename, data):
             array = list(chain.from_iterable(izip(*array)))
 
         # write matrix data to memory file
-        if array:
-            write_elements(bd, header['mtp'], array)
+        write_elements(bd, header['mtp'], array)
 
         # write the variable to disk file
         data = bd.getvalue()
@@ -717,7 +716,12 @@ def savemat(filename, data):
             # sequence with only one element, squeeze the array
             array = array[0]
 
-        if isinstance(array, Sequence) and len(array) == 0:
+        if isinstance(array, basestring):
+            header.update({
+                'mclass': 'mxCHAR_CLASS', 'mtp': 'miUTF8',
+                'dims': (1 if len(array) > 0 else 0, len(array))})
+
+        elif isinstance(array, Sequence) and len(array) == 0:
             # empty (int) array
             header.update({
                 'mclass': 'mxINT32_CLASS', 'mtp': 'miINT32', 'dims': (0, 0)})
@@ -751,11 +755,6 @@ def savemat(filename, data):
         elif isinstance(array, float):
             header.update({
                 'mclass': 'mxDOUBLE_CLASS', 'mtp': 'miDOUBLE', 'dims': (1, 1)})
-
-        elif isinstance(array, basestring):
-            header.update({
-                'mclass': 'mxCHAR_CLASS', 'mtp': 'miUTF8',
-                'dims': (1, len(array))})
 
         elif isinstance(array, Sequence):
 

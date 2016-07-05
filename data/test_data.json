@@ -6,6 +6,8 @@
     "struct_cell.mat": {"X": {"w": [[1, 2], [3, 4]], "y": [[2, 3], [4, 5]],
         "z": [[3, 4], [5, 6]]}},
     "simple_struct.mat": {"a": {"msg": "test"}},
-    "struct_cell2.mat": {"X": {"a": [[1, 2], [3, 4], [5, 6]], "b": {"x": "example", "y": [1.2, 2.3, 3.4], "z": [0.1, 0.2]}}}
+    "struct_cell2.mat": {"X": {"a": [[1, 2], [3, 4], [5, 6]], "b": {"x": "example", "y": [1.2, 2.3, 3.4], "z": [0.1, 0.2]}}},
+    "struct_struct_num.mat": {"a": {"b": 0}},
+    "struct_struct_string.mat": {"a": {"b": ""}}
   }
 }
