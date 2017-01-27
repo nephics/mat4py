@@ -530,6 +530,9 @@ def savemat(filename, data):
                     fmt = ''.join('{}s'.format(len(s)) for s in data)
             else:
                 l = len(data)
+                if l == 0:
+                    # empty array
+                    fmt = ''
                 if l > 1:
                     # more than one element to be written
                     fmt = '{}{}'.format(l, fmt)
