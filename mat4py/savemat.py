@@ -445,6 +445,9 @@ def savemat(filename, data):
 
     savemat(filename, data)
 
+    The filename argument is either a string with the filename, or
+    a file like object.
+
     The parameter ``data`` shall be a dict with the variables.
 
     A ``ValueError`` exception is raised if data has invalid format, or if the
@@ -453,7 +456,11 @@ def savemat(filename, data):
 
     if not isinstance(data, Mapping):
         raise ValueError('Data should be a dict of variable arrays')
-    fd = open(filename, 'wb')
+
+    if isinstance(filename, basestring):
+        fd = open(filename, 'wb')
+    else:
+        fd = filename
 
     write_file_header(fd)
 

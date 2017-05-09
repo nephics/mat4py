@@ -398,6 +398,9 @@ def loadmat(filename, meta=False):
 
     data = loadmat(filename, meta=False)
 
+    The filename argument is either a string with the filename, or
+    a file like object.
+
     The returned parameter ``data`` is a dict with the variables found
     in the MAT file.
 
@@ -408,7 +411,10 @@ def loadmat(filename, meta=False):
     contains a data type that cannot be parsed.
     """
 
-    fd = open(filename, 'rb')
+    if isinstance(filename, basestring):
+        fd = open(filename, 'rb')
+    else:
+        fd = filename
 
     # Check mat file format is version 5
     # For 5 format we need to read an integer in the header.
