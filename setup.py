@@ -5,9 +5,10 @@ def readme():
     with open('README.rst') as f:
         return f.read()
 
+
 setup(
     name='mat4py',
-    version='0.3.0',
+    version='0.4.0',
     author='Jacob Svensson',
     author_email='jacob@nephics.com',
     packages=['mat4py'],
