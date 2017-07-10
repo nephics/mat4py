@@ -12,7 +12,7 @@ setup(
     author='Jacob Svensson',
     author_email='jacob@nephics.com',
     packages=['mat4py'],
-    url='https://bitbucket.org/nephics/mat4py/',
+    url='https://github.com/nephics/mat4py/',
     license='MIT License',
     description='Load and save data in the Matlab (TM) MAT-file format.',
     long_description=readme(),
