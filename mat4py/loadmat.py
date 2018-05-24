@@ -175,8 +175,9 @@ def read_elements(fd, endian, mtps, is_name=False):
     """
     mtpn, num_bytes, data = read_element_tag(fd, endian)
     if mtps and mtpn not in [etypes[mtp]['n'] for mtp in mtps]:
-        raise ParseError('Expected {} type number {}, got {}'
-                         .format(mtp, etypes[mtp]['n'], mtpn))
+        raise ParseError('Got type {}, expected {}'.format(
+            mtpn, ' / '.join('{} ({})'.format(
+                etypes[mtp]['n'], mtp) for mtp in mtps)))
     if not data:
         # full format, read data
         data = fd.read(num_bytes)
@@ -201,6 +202,7 @@ def read_elements(fd, endian, mtps, is_name=False):
         fmt = etypes[inv_etypes[mtpn]]['fmt']
         val = unpack(endian, fmt, data)
     return val
+
 
 def read_header(fd, endian):
     """Read and return the matrix header."""
