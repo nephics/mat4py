@@ -425,7 +425,7 @@ def guess_header(array, name=''):
             # mixed contents, make it a cell array
             header.update({
                 'mclass': 'mxCELL_CLASS',
-                'dims': (1, len(next(array.values())))})
+                'dims': (1, len(array))})
 
     if not header:
         raise ValueError(
