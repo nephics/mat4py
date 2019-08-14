@@ -266,10 +266,16 @@ def read_numeric_array(fd, endian, header, data_etypes):
     """Read a numeric matrix.
     Returns an array with rows of the numeric matrix.
     """
-    if header['is_complex']:
-        raise ParseError('Complex arrays are not supported')
     # read array data (stored as column-major)
-    data = read_elements(fd, endian, data_etypes)
+    if(header["is_complex"]):
+        realData = read_elements(fd, endian, data_etypes)
+        imagData = read_elements(fd, endian, data_etypes)
+        data = list()
+        for dataIndex in range(0,len(realData)):
+            data.append(complex(realData[dataIndex],imagData[dataIndex]))
+        data = tuple(data)
+    else:
+        data = read_elements(fd, endian, data_etypes)
     if not isinstance(data, Sequence):
         # not an array, just a value
         return data
