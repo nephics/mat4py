@@ -1,6 +1,6 @@
 {
   "loadmat": {
-    "complex_array.mat": {"a": [[{"__complex__":[0,0]},{"__complex__":[0,1]}],[{"__complex__":[1,0]},{"__complex__":[0,2]}]]},
+    "complex_array.mat": {"a": [[{"__complex__":[0,0]},{"__complex__":[0,1]}],[{"__complex__":[1,0]},{"__complex__":[0,2]}],[{"__complex__":[2,2]},{"__complex__":[0,0]}]]},
     "cell_array.mat": {"c": [["big", "little"], [1, 2, 3]]},
     "char_array.mat": {"a": ["123", "456"]},
     "struct_array.mat": {"s": {"color": ["red", "red"], "x": [3, 4], "type": ["big", "little"]}},
