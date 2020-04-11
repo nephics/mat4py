@@ -11,7 +11,11 @@ import struct
 import sys
 import zlib
 
-from collections import Sequence
+try:
+    from collections.abc import Sequence
+except ImportError:
+    from collections import Sequence
+
 from itertools import tee
 try:
     from itertools import izip
