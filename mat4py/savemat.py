@@ -1,6 +1,6 @@
 """savemat - save data in the Matlab (TM) MAT-file format
 
-Copyright (c) 2011-2018 Nephics AB
+Copyright (c) 2011-2020 Nephics AB
 The MIT License (MIT)
 """
 
