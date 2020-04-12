@@ -12,7 +12,11 @@ import sys
 import time
 import zlib
 
-from collections import Sequence, Mapping
+try:
+    from collections.abc import Sequence, Mapping
+except ImportError:
+    from collections import Sequence, Mapping
+
 from itertools import chain, tee
 try:
     from itertools import izip
