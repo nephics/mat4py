@@ -30,9 +30,9 @@ The following Matlab data structures/types are not supported:
 from .loadmat import loadmat
 from .savemat import savemat
 
-__version__ = '0.4.3'
+__version__ = '0.5.0'
 __all__ = ['loadmat', 'savemat']
-__license__ = """The MIT License (MIT), Copyright (c) 2011-2020 Nephics AB"""
+__license__ = """The MIT License (MIT), Copyright (c) 2011-2021 Nephics AB"""
 
 
 if __name__ == '__main__':

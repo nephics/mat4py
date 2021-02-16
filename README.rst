@@ -71,6 +71,6 @@ License
 -------
 
 The MIT License (MIT)
-Copyright (c) 2011-2020 Nephics AB
+Copyright (c) 2011-2021 Nephics AB
 
 See the ``LICENSE.txt`` file.
