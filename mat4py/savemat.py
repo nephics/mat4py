@@ -367,8 +367,12 @@ def guess_header(array, name=''):
             )
 
     elif isinstance(array, int):
-        header.update({
-            'mclass': 'mxINT32_CLASS', 'mtp': 'miINT32', 'dims': (1, 1)})
+        if array > 2 ^ 31 - 1:
+            header.update({
+                'mclass': 'mxINT64_CLASS', 'mtp': 'miINT64', 'dims': (1, 1)})
+        else:
+            header.update({
+                'mclass': 'mxINT32_CLASS', 'mtp': 'miINT32', 'dims': (1, 1)})
 
     elif isinstance(array, float):
         header.update({
