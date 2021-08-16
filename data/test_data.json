@@ -10,6 +10,8 @@
     "struct_struct_num.mat": {"a": {"b": 0}},
     "struct_struct_string.mat": {"a": {"b": ""}},
     "empty_array.mat": {"a": []},
-    "bit_int.mat": {"a": 2147483648}
+    "bit_int.mat": {"a": 2147483648},
+    "bit_int_array.mat": {"a": [0, 2147483649, 4294967296]},
+    "bit_int_2d_array.mat": {"a": [[0, 2147483649, 4294967296], [0, 2147483649, -1]]}
   }
 }
