@@ -1,6 +1,6 @@
 """savemat - save data in the Matlab (TM) MAT-file format
 
-Copyright (c) 2011-2018 Nephics AB
+Copyright (c) 2011-2021 Nephics AB
 The MIT License (MIT)
 """
 
@@ -12,7 +12,11 @@ import sys
 import time
 import zlib
 
-from collections import Sequence, Mapping
+try:
+    from collections.abc import Sequence, Mapping
+except ImportError:
+    from collections import Sequence, Mapping
+
 from itertools import chain, tee
 try:
     from itertools import izip
@@ -363,8 +367,12 @@ def guess_header(array, name=''):
             )
 
     elif isinstance(array, int):
-        header.update({
-            'mclass': 'mxINT32_CLASS', 'mtp': 'miINT32', 'dims': (1, 1)})
+        if array > 2 ^ 31 - 1:
+            header.update({
+                'mclass': 'mxINT64_CLASS', 'mtp': 'miINT64', 'dims': (1, 1)})
+        else:
+            header.update({
+                'mclass': 'mxINT32_CLASS', 'mtp': 'miINT32', 'dims': (1, 1)})
 
     elif isinstance(array, float):
         header.update({

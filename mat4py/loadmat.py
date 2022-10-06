@@ -1,6 +1,6 @@
 """load data in the Matlab (TM) MAT-file format
 
-Copyright (c) 2011-2018 Nephics AB
+Copyright (c) 2011-2021 Nephics AB
 The MIT License (MIT)
 """
 
@@ -11,7 +11,11 @@ import struct
 import sys
 import zlib
 
-from collections import Sequence
+try:
+    from collections.abc import Sequence
+except ImportError:
+    from collections import Sequence
+
 from itertools import tee
 try:
     from itertools import izip
