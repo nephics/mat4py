@@ -96,6 +96,9 @@ inv_mclasses = dict((v, k) for k, v in mclasses.items())
 compressed_numeric = ['miINT32', 'miUINT16', 'miINT16', 'miUINT8']
 
 
+INT32_MAX = 2 ** 31 - 1
+
+
 def diff(iterable):
     """Diff elements of a sequence:
     s -> s0 - s1, s1 - s2, s2 - s3, ...
@@ -367,7 +370,7 @@ def guess_header(array, name=''):
             )
 
     elif isinstance(array, int):
-        if array > 2 ^ 31 - 1:
+        if array > INT32_MAX:
             header.update({
                 'mclass': 'mxINT64_CLASS', 'mtp': 'miINT64', 'dims': (1, 1)})
         else:
@@ -382,9 +385,14 @@ def guess_header(array, name=''):
 
         if isarray(array, lambda i: isinstance(i, int), 1):
             # 1D int array
-            header.update({
-                'mclass': 'mxINT32_CLASS', 'mtp': 'miINT32',
-                'dims': (1, len(array))})
+            if max(array) > INT32_MAX:
+                header.update({
+                    'mclass': 'mxINT64_CLASS', 'mtp': 'miINT64',
+                    'dims': (1, len(array))})
+            else:
+                header.update({
+                    'mclass': 'mxINT32_CLASS', 'mtp': 'miINT32',
+                    'dims': (1, len(array))})
 
         elif isarray(array, lambda i: isinstance(i, (int, float)), 1):
             # 1D double array
@@ -417,9 +425,14 @@ def guess_header(array, name=''):
 
             elif isarray(array, lambda i: isinstance(i, int)):
                 # 2D int array
-                header.update({
-                    'mclass': 'mxINT32_CLASS', 'mtp': 'miINT32',
-                    'dims': (len(array), len(array[0]))})
+                if max([max(inner_array) for inner_array in array]) > INT32_MAX:
+                    header.update({
+                        'mclass': 'mxINT64_CLASS', 'mtp': 'miINT64',
+                        'dims': (len(array), len(array[0]))})
+                else:
+                    header.update({
+                        'mclass': 'mxINT32_CLASS', 'mtp': 'miINT32',
+                        'dims': (len(array), len(array[0]))})
 
             elif isarray(array, lambda i: isinstance(i, (int, float))):
                 # 2D double array
