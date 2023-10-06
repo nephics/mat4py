@@ -1,17 +1,15 @@
-
 import sys
 if sys.version_info[0] == 2:
     # unittest2 required with python2 for subTest() functionality
     import unittest2 as unittest
 else:
     import unittest
-import json
+from json_tricks import dumps, load # https://json-tricks.readthedocs.io/en/latest/
 import os
 
 import mat4py
 
-
-test_data = json.load(open('data/test_data.json'))
+test_data = load(open('data/test_data.json'))
 
 
 class TestSequenceFunctions(unittest.TestCase):
@@ -59,4 +57,6 @@ class TestSequenceFunctions(unittest.TestCase):
 
 
 if __name__ == '__main__':
+    # a = (complex(0,1),complex(2,0))
+    # print(dumps(a))
     unittest.main()

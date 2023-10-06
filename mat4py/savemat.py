@@ -179,8 +179,13 @@ def write_var_header(fd, header):
 
     # write tag bytes,
     # and array flags + class and nzmax (null bytes)
+    if(not ('is_complex' in header.keys())):
+        header['is_complex'] = False
     fd.write(struct.pack('b3xI', etypes['miUINT32']['n'], 8))
-    fd.write(struct.pack('b3x4x', mclasses[header['mclass']]))
+    if(header['is_complex']):
+        fd.write(struct.pack('bb2x4x', mclasses[header['mclass']],8))
+    else:
+        fd.write(struct.pack('b3x4x', mclasses[header['mclass']]))
 
     # write dimensions array
     write_elements(fd, 'miINT32', header['dims'])
@@ -224,7 +229,19 @@ def write_numeric_array(fd, header, array):
         array = list(chain.from_iterable(izip(*array)))
 
     # write matrix data to memory file
-    write_elements(bd, header['mtp'], array)
+    if(not ('is_complex' in header.keys())):
+        header['is_complex'] = False
+
+    if(header['is_complex']):
+        arrayReal = list()
+        arrayImag = list()
+        for valueIndex in range(0,len(array)):
+            arrayReal.append(array[valueIndex].real)
+            arrayImag.append(array[valueIndex].imag)
+        write_elements(bd, header['mtp'], arrayReal)
+        write_elements(bd, header['mtp'], arrayImag)
+    else:
+        write_elements(bd, header['mtp'], array)
 
     # write the variable to disk file
     data = bd.getvalue()
@@ -400,6 +417,13 @@ def guess_header(array, name=''):
                 'mclass': 'mxDOUBLE_CLASS', 'mtp': 'miDOUBLE',
                 'dims': (1, len(array))})
 
+        elif isarray(array, lambda i: isinstance(i, complex), 1):
+            # 1D double array
+            header.update({
+                'mclass': 'mxDOUBLE_CLASS', 'mtp': 'miDOUBLE',
+                'dims': (1, len(array)),
+                'is_complex' : True})
+
         elif (isarray(array, lambda i: isinstance(i, Sequence), 1) and
                 any(diff(len(s) for s in array))):
             # sequence of unequal length, assume cell array
@@ -439,6 +463,14 @@ def guess_header(array, name=''):
                 header.update({
                     'mclass': 'mxDOUBLE_CLASS',
                     'mtp': 'miDOUBLE',
+                    'dims': (len(array), len(array[0]))})
+
+            elif isarray(array, lambda i: isinstance(i, complex)):
+                # 2D double array
+                header.update({
+                    'mclass': 'mxDOUBLE_CLASS',
+                    'mtp': 'miDOUBLE',
+                    'is_complex' : True,
                     'dims': (len(array), len(array[0]))})
 
         elif isarray(array, lambda i: isinstance(
