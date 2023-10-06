@@ -26,13 +26,14 @@ The following Matlab data structures/types are not supported:
 * Function arrays
 * Object classes
 * Anonymous function classes
+
 """
 from .loadmat import loadmat
 from .savemat import savemat
 
-__version__ = '0.5.0'
+__version__ = '0.6.0'
 __all__ = ['loadmat', 'savemat']
-__license__ = """The MIT License (MIT), Copyright (c) 2011-2021 Nephics AB"""
+__license__ = """The MIT License (MIT), Copyright (c) 2011-2023 Nephics AB"""
 
 
 if __name__ == '__main__':

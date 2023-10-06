@@ -8,7 +8,7 @@ def readme():
 
 setup(
     name='mat4py',
-    version='0.5.0',
+    version='0.6.0',
     author='Jacob Svensson',
     author_email='jacob@nephics.com',
     packages=['mat4py'],
